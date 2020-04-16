@@ -1,0 +1,38 @@
+[[ " help docsplit:help " == *" $1 "* ]] || exit "$DOKKU_NOT_IMPLEMENTED_EXIT"
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+case "$1" in
+
+  help | docsplit:help)
+    help_content_func() {
+      #shellcheck disable=SC2034
+      declare desc="return docsplit plugin help content"
+      cat<<help_content
+    docsplit:install <app>, Sets up app for Docsplit dependency installation on future deployments.
+    docsplit:uninstall <app>, Removes Docsplit dependency installation on future deployments.
+
+    docsplit:help, Display docsplit help
+help_content
+    }
+
+    if [[ $1 = "docsplit:help" ]]; then
+      echo -e 'Usage: dokku docsplit[:COMMAND]'
+      echo ''
+      echo 'Plugin for sourcing docsplit dependency.'
+      echo ''
+      echo 'Additional commands:'
+      help_content_func | sort | column -c2 -t -s,
+    elif [[ $(ps -o command= $PPID) == *"--all"* ]]; then
+      help_content_func
+    else
+      cat<<help_desc
+    docsplit, Plugin for sourcing docsplit dependency
+help_desc
+    fi
+    ;;
+
+  *)
+    exit "$DOKKU_NOT_IMPLEMENTED_EXIT"
+    ;;
+
+esac
